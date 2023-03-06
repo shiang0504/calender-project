@@ -2,8 +2,8 @@
 
 
 ## 專案簡介
-[Demo網址](https://shiang0504.github.io/calender-project/)
-簡易版本的google日曆，並結合天氣預報，
+[Demo網址](https://shiang0504.github.io/calender-project/)<br>
+簡易版本的google日曆，並結合天氣預報，<br>
 RWD響應式設計，支援觸控手勢操作(滑動切換行事曆年、月份)
 
 ## 開發工具
