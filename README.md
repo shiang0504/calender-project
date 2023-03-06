@@ -1,6 +1,6 @@
 # 行事曆APP
-![](https://imgur.com/s51tfOj)
-![](https://imgur.com/9WdXoyn)
+![](https://imgur.com/s51tfOj.jpg)
+![](https://imgur.com/9WdXoyn.jpg)
 
 ## 專案簡介
 [Demo網址](https://shiang0504.github.io/calender-project/)<br>
