@@ -7,9 +7,9 @@
 RWD響應式設計，支援觸控手勢操作(滑動切換行事曆年、月份)
 
 ## 開發工具
-*Vite
-*Vue3 Composition API
-*SCSS
+* Vite
+* Vue3 Composition API
+* SCSS
 
 ## 其他說明
 ###### 天氣預報
