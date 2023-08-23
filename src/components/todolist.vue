@@ -1,7 +1,8 @@
 <script setup>
 import { ref, reactive, watchEffect, watch, computed, onMounted } from 'vue'
+// demo資料
 import todosDemo from '/json/todosDemo.json'
-// todosDemo.forEach(todo => todo.month=new Date().getMonth());
+todosDemo.forEach(todo => todo.month=new Date().getMonth());
 
 
 // v-model綁定
@@ -13,8 +14,8 @@ const show = ref(true)
 const input = ref(null)
 
 const showWrap = ref(true)
-const todos = reactive(JSON.parse(localStorage.getItem('todos')) || [])
-// const todos = reactive(JSON.parse(localStorage.getItem('todos')) || todosDemo)
+// const todos = reactive(JSON.parse(localStorage.getItem('todos')) || [])
+const todos = reactive(JSON.parse(localStorage.getItem('todos')) || todosDemo)
 const todoDate = reactive(JSON.parse(localStorage.getItem('todoDate')) || {})
 const doneDisplay = ref(JSON.parse(localStorage.getItem('doneDisplay')) || 'show')
 const categoryDisplay = ref(JSON.parse(localStorage.getItem('categoryDisplay')) || 'all')
@@ -69,6 +70,9 @@ watch(props.clickDate, (changeDate) => {
     todoDate.month= changeDate.month
     todoDate.date= changeDate.date
     todoDate.day= changeDate.day
+    todoDate.lunar_year= changeDate.lunar_year
+    todoDate.lunar_month= changeDate.lunar_month
+    todoDate.lunar_date= changeDate.lunar_date
     showWrap.value= false
 })
 //處理list顯示
@@ -171,6 +175,7 @@ onMounted(()=>{
         <div class="tool" @click="listClose"><i class="fa-solid fa-rotate-left"></i></div>
         <div class="section" @touchstart="touchstartHandler" @touchend="touchendHandler">
             <h2>{{todoDate.year}}年{{todoDate.month+1}}月{{todoDate.date}}日({{dayTransfer(todoDate.day)}})</h2>
+            <h3>{{todoDate.lunar_year}}年{{todoDate.lunar_month}}{{todoDate.lunar_date}}</h3>
             <form @submit.prevent="submitHandler">
                 <div class="inputBox">
                     <input autofocus @vnode-mounted="({ el }) => el.focus()" type="text" name="contant" id="contant" v-model="contant" ref="input">
@@ -208,7 +213,7 @@ onMounted(()=>{
                 </div>
             </div>
             <div v-else-if="!filterToday.length">
-                <h3>目前這天沒有代辦事項，來新增第一筆吧!</h3>
+                <h3>目前這天沒有待辦事項，來新增第一筆吧!</h3>
             </div>
         </div>
         <div class="todolist">
@@ -365,7 +370,13 @@ i{
         }
         h2 {
             text-align: center;
-            margin: 20px 0 20px 0;
+            margin: 20px 0 10px 0;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: gray;
+            font-size: 12px;
         }
         form {
             .inputBox{

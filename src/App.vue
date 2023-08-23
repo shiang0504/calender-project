@@ -3,9 +3,10 @@ import { reactive, ref, watch, watchEffect, computed, onMounted, onUpdated, onBe
 import todolist from './components/todolist.vue'
 import weather from './components/weather.vue'
 // demo資料
-import todosDemo from '/json/todosDemo.json'
-todosDemo.forEach(todo => todo.month=new Date().getMonth()); //保持在當下月份
-
+// import todosDemo from '/json/todosDemo.json'
+// 節氣資料
+import solarTerms from '/json/solarTerms.json'
+// todosDemo.forEach(todo => todo.month=new Date().getMonth()); //保持在當下月份
 const message = reactive({})
 const showCalendar = ref(true)
 const showCalendarName = ref('')
@@ -13,7 +14,7 @@ const todayCalendar = reactive({}) //當下月份
 const calendar = reactive(JSON.parse(localStorage.getItem('calendar') ||'{}')) //萬年曆查詢月份
 const today = new Date()
 watchEffect(()=>{
-    localStorage.setItem('todos', JSON.stringify(todosDemo))
+    // localStorage.setItem('todos', JSON.stringify(todosDemo))
     localStorage.setItem('calendar',JSON.stringify(calendar))
 })
 const originalDate=()=>{  //初始化今天的日期
@@ -36,11 +37,14 @@ const fortodolist = reactive({
     day: ''
 })
 
-const clickDate=({year, month, date, day})=>{
+const clickDate=({year, month, date, day, lunar_year, lunar_month, lunar_date})=>{
     fortodolist.year= year
     fortodolist.month= month
     fortodolist.date= calendar.date= date
     fortodolist.day= calendar.day= day
+    fortodolist.lunar_year= lunar_year
+    fortodolist.lunar_month= lunar_month
+    fortodolist.lunar_date= lunar_date
     listToggle.value = true
 }
 //將todolist子組件和萬年曆的顯示日期都回到當天日期
@@ -75,6 +79,14 @@ const setYear=(change)=>{
 const show=()=>{
     showCalendar.value= true
 }
+
+const lunar_date_transfer = (date) =>{
+    const arr = ['','初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+            '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+            '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十']
+    return arr[date]
+}
+
 //萬年曆最終顯示的"42日" (以星期日為第一欄為基準做調整)
 const calendarDisplay = computed(()=>{ 
     const datas = reactive([]);
@@ -87,6 +99,10 @@ const calendarDisplay = computed(()=>{
             month: date.getMonth(),
             date: date.getDate(),
             day: date.getDay(),
+            // lunar: new Date(fisrtDateFix.getFullYear(), fisrtDateFix.getMonth(), fisrtDateFix.getDate() + i).toLocaleString('zh-CN-u-ca-chinese').replace(/(\d+)\s*?年/, (_,y)=>"甲乙丙丁戊己庚辛壬癸".charAt((y-4)%10)+ "子丑寅卯辰巳午未申酉戌亥".charAt((y-4)%12)).replace('月','月 ').split(' '),  // ['癸卯十一月', '14', '00:00:00']
+            lunar_year: new Date(fisrtDateFix.getFullYear(), fisrtDateFix.getMonth(), fisrtDateFix.getDate() + i).toLocaleString('zh-CN-u-ca-chinese').replace(/(\d+)\s*?年/, (_,y)=>"甲乙丙丁戊己庚辛壬癸".charAt((y-4)%10)+ "子丑寅卯辰巳午未申酉戌亥".charAt((y-4)%12)).replace('月','月 ').split(' ')[0].slice(0,2), //'癸卯'
+            lunar_month: new Date(fisrtDateFix.getFullYear(), fisrtDateFix.getMonth(), fisrtDateFix.getDate() + i).toLocaleString('zh-CN-u-ca-chinese').replace(/(\d+)\s*?年/, (_,y)=>"甲乙丙丁戊己庚辛壬癸".charAt((y-4)%10)+ "子丑寅卯辰巳午未申酉戌亥".charAt((y-4)%12)).replace('月','月 ').split(' ')[0].slice(2,5), //'十一月'
+            lunar_date: lunar_date_transfer(new Date(fisrtDateFix.getFullYear(), fisrtDateFix.getMonth(), fisrtDateFix.getDate() + i).toLocaleString('zh-CN-u-ca-chinese').replace(/(\d+)\s*?年/, (_,y)=>"甲乙丙丁戊己庚辛壬癸".charAt((y-4)%10)+ "子丑寅卯辰巳午未申酉戌亥".charAt((y-4)%12)).replace('月','月 ').split(' ')[1]),  //'14'
             todo:[],
             count: {
                 totle: 0,
@@ -103,15 +119,17 @@ const calendarDisplay = computed(()=>{
     }
     return datas
 })
-//子組件按新增後觸發該事件 如果todos資料年月日與月曆相符 就在calendarDisplay加上.todo物件 
+//子組件按新增後觸發該事件  
 const updateTodoInCalendar = () =>{
     const todos = reactive(JSON.parse(localStorage.getItem('todos')) || todosDemo)
-    calendarDisplay.value.forEach((date)=>{
+    calendarDisplay.value.forEach(date=>{
         date.todo=[]
+        date.solar=''
         date.count.totle = date.count.personal.undone = date.count.personal.done = date.count.business.undone = date.count.business.done = 0
     })
-    todos.forEach(todo => {
-        calendarDisplay.value.forEach((date)=>{
+    calendarDisplay.value.forEach(date=>{
+        // 如果todos資料年月日與月曆相符 就在calendarDisplay加上.todo物件
+        todos.forEach(todo => {
             if (todo.year===date.year && todo.month===date.month && todo.date===date.date){
                 date.todo.push({
                     id: todo.id,
@@ -129,6 +147,12 @@ const updateTodoInCalendar = () =>{
                 }else if (todo.category==='business' && todo.done===true) {
                     date.count.business.done +=1
                 }
+            }
+        })
+        // 如果節氣資料年月日與月曆相符 就在calendarDisplay加上
+        solarTerms.forEach(solar => {
+            if (date.year===solar.year && date.month===solar.month-1 && date.date===solar.date){
+                date.solar=solar.contant
             }
         })
     })
@@ -191,7 +215,6 @@ const touchstartHandler=(event)=>{
     startY = event.touches[0].clientY
 }
 const touchendHandler=(event)=>{
-    console.log(event)
     endX = event.changedTouches[0].clientX
     endY = event.changedTouches[0].clientY
     if (Math.abs(Math.abs(startX-endX)-Math.abs(startY-endY)) < 20){
@@ -257,11 +280,15 @@ const touchendHandler=(event)=>{
                     <div class="weeks">
                         <div class="week" v-for="i in 6">
                             <div class="day" :class="{ isCurrentMonth: isCurrentMonth(i,j), isClickDate: isClickDate(i,j) }" v-for="j in 7" @click="clickDate(calendarDisplay[(i-1)*7+(j-1)])">
-                                <div class="date" :class="{ isCurrentDate: isCurrentDate(i,j)}">{{ calendarDisplay[(i-1)*7+(j-1)].date >= 10 ? calendarDisplay[(i-1)*7+(j-1)].date : `&ensp;${calendarDisplay[(i-1)*7+(j-1)].date}`}}</div>
+                                <div class="date" :class="{ isCurrentDate: isCurrentDate(i,j)}">{{ calendarDisplay[(i-1)*7+(j-1)].date }} 
+                                    <div v-if="calendarDisplay[(i-1)*7+(j-1)].solar" class="solar">{{ calendarDisplay[(i-1)*7+(j-1)].solar }}</div>
+                                    <div v-else class="lunar">{{ calendarDisplay[(i-1)*7+(j-1)].lunar_date=='初一'? calendarDisplay[(i-1)*7+(j-1)].lunar_month : calendarDisplay[(i-1)*7+(j-1)].lunar_date }}</div>
+                                </div>
                                 <span class="undone" v-if="calendarDisplay[(i-1)*7+(j-1)].count.personal.undone+calendarDisplay[(i-1)*7+(j-1)].count.business.undone">{{ calendarDisplay[(i-1)*7+(j-1)].count.personal.undone+calendarDisplay[(i-1)*7+(j-1)].count.business.undone }}</span>
                                 <span class="personalDone" v-if="calendarDisplay[(i-1)*7+(j-1)].count.personal.done">{{ calendarDisplay[(i-1)*7+(j-1)].count.personal.done }}</span>
                                 <span class="businessDone" v-if="calendarDisplay[(i-1)*7+(j-1)].count.business.done">{{ calendarDisplay[(i-1)*7+(j-1)].count.business.done }}</span>
                                 <ul>
+                                    <!-- <li v-if="calendarDisplay[(i-1)*7+(j-1)].solar" class="solar"> {{ calendarDisplay[(i-1)*7+(j-1)].solar }}</li> -->
                                     <li :class="{personal: item.category==='personal', business: item.category==='business', done: item.done}" v-for="(item, index) in calendarDisplay[(i-1)*7+(j-1)].todo">{{ item.contant }}</li>
                                 </ul>
                             </div>
@@ -488,7 +515,6 @@ $clickDate-color: rgb(255, 238, 224);
                             min-width: 0;
                             background-color:rgba(230, 229, 229, 0.5);
                             transition: all .3s .1s ease-in-out;
-
                             .date{
                                 display: inline-block;
                                 position: sticky;
@@ -497,7 +523,8 @@ $clickDate-color: rgb(255, 238, 224);
                                 padding: 3px;
                                 margin-right: 5px;
                                 margin-bottom: 5px;
-                                width: 20px;
+                                width: 40px;
+                                text-align: center;
                                 border-bottom: 1px solid $button-shadow;
                                 border-right: 1px solid $button-shadow;
                                 border-bottom-right-radius: 20%;
@@ -511,6 +538,17 @@ $clickDate-color: rgb(255, 238, 224);
                                     background-color: $today-color !important ;
                                     color: white;
                                 }
+                                .solar{
+                                    font-size: 10px;
+                                    font-weight: 600;
+                                    background: rgb(254, 183, 183);
+                                    border-radius: 20px;
+                                    color: white;
+                                }
+                                .lunar{
+                                    font-size: 10px;
+                                    color: gray;
+                                }
                             }
                             span{
                                 display: inline-block;
@@ -519,7 +557,7 @@ $clickDate-color: rgb(255, 238, 224);
                                 height: 16px;
                                 padding: 1px;
                                 position: sticky;
-                                top: 6px;
+                                top: 30px;
                                 background-color: $button-shadow;
                                 color: white;
                                 border-radius: 50%;
@@ -563,6 +601,13 @@ $clickDate-color: rgb(255, 238, 224);
                                 &.done{
                                     text-decoration: line-through;
                                 }
+                                // &.solar{
+                                //     background: rgb(254, 183, 183);
+                                //     border-radius: 20px;
+                                //     margin: 0 5px;
+                                //     color: white;
+                                //     font-size: 10px;
+                                // }
                             }
                             &.isCurrentMonth{
                                 background-color: white;
