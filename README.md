@@ -1,7 +1,26 @@
-# Vue 3 + Vite
+# 行事曆APP
+![](https://imgur.com/DpNSL8m.jpg)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 專案簡介
+[Demo網址](https://shiang0504.github.io/calender-project/)<br>
+簡易版本的google日曆，並串接OpenWeather API天氣預報，<br>
+支援觸控手勢操作(滑動切換行事曆年、月份)，<br>
+使用Vue3 Composition API、Vite管理開發。
 
-## Recommended IDE Setup
+## 開發工具
+* Vite
+* Vue3 Composition API
+* SCSS
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## 其他說明
+###### 萬年曆
+* 依據json檔案或localStorage內容呈現
+
+###### 天氣預報
+* 輸入城市中、英文名取得五日內天氣預報
+* 天氣預報串接OpenWeather API取得
+* 背景圖片串接unsplash API取得
+
+###### todoList
+* 新增、修改、刪除及分類
+* 可標示是否完成即篩選功能
