@@ -1,12 +1,12 @@
 <script setup>
-import { reactive, ref, watch, watchEffect, computed, onMounted, onUpdated, onBeforeUpdate} from 'vue';
+import { reactive, ref, watch, watchEffect, computed, onMounted, onUpdated} from 'vue';
 import todolist from './components/todolist.vue'
 import weather from './components/weather.vue'
 // demo資料
-// import todosDemo from '/json/todosDemo.json'
+import todosDemo from '/json/todosDemo.json'
 // 節氣資料
 import solarTerms from '/json/solarTerms.json'
-// todosDemo.forEach(todo => todo.month=new Date().getMonth()); //保持在當下月份
+todosDemo.forEach(todo => todo.month=new Date().getMonth()); //保持在當下月份
 const message = reactive({})
 const showCalendar = ref(true)
 const showCalendarName = ref('')
@@ -121,6 +121,7 @@ const calendarDisplay = computed(()=>{
 })
 //子組件按新增後觸發該事件  
 const updateTodoInCalendar = () =>{
+    
     const todos = reactive(JSON.parse(localStorage.getItem('todos')) || todosDemo)
     calendarDisplay.value.forEach(date=>{
         date.todo=[]
@@ -296,6 +297,11 @@ const touchendHandler=(event)=>{
                     </div>
                 </div>
                 </Transition>
+                <div class="legend">
+                    <div><span class="point undone"></span><span class="text">未完成</span></div>
+                    <div><span class="point personalDone"></span><span class="point businessDone"></span><span class="text">已完成</span></div>
+                    <!-- <div><span class="point businessDone"></span><span class="text">工作-已完成</span></div> -->
+                </div>
             </div>
             <weather :weatherToggle="weatherToggle" />
         </div>
@@ -534,10 +540,6 @@ $clickDate-color: rgb(255, 238, 224);
                                 }
                                 @include mobile-576{
                                 }
-                                &.isCurrentDate{
-                                    background-color: $today-color !important ;
-                                    color: white;
-                                }
                                 .solar{
                                     font-size: 10px;
                                     font-weight: 600;
@@ -548,6 +550,14 @@ $clickDate-color: rgb(255, 238, 224);
                                 .lunar{
                                     font-size: 10px;
                                     color: gray;
+                                }
+                                &.isCurrentDate{
+                                    background-color: $today-color !important ;
+                                    color: white;
+                                    font-weight: 800;
+                                    .lunar{
+                                        color: rgb(222, 222, 222);
+                                    }
                                 }
                             }
                             span{
@@ -601,13 +611,6 @@ $clickDate-color: rgb(255, 238, 224);
                                 &.done{
                                     text-decoration: line-through;
                                 }
-                                // &.solar{
-                                //     background: rgb(254, 183, 183);
-                                //     border-radius: 20px;
-                                //     margin: 0 5px;
-                                //     color: white;
-                                //     font-size: 10px;
-                                // }
                             }
                             &.isCurrentMonth{
                                 background-color: white;
@@ -622,7 +625,6 @@ $clickDate-color: rgb(255, 238, 224);
                                 .date{
                                     background-color: $clickDate-color;
                                     transition: all .3s .5s ease-in-out;
-        
                                 }
                             }
                             &:hover{
@@ -632,6 +634,39 @@ $clickDate-color: rgb(255, 238, 224);
                         }
                     }
                 }
+            }
+            .legend{
+                display: none;
+                justify-content: space-evenly;
+                align-items: center;
+                margin-top: 10px;
+                font-size: 12px;
+                color: gray;
+                @include tablet-768{
+                    display: flex;
+                }
+                >div{
+                    display: flex;
+                    align-items: center;
+                    .point{
+                        display: block;
+                        border-radius: 50%;
+                        width: 12px;
+                        height: 12px;
+                        font-size: 12px;
+                        margin-right: 3px;
+                        &.undone{
+                            background-color: $button-shadow;
+                        }
+                        &.personalDone{
+                            background-color: $bubble-personal-color;
+                        }
+                        &.businessDone{
+                            background-color: $bubble-business-color;
+                        }
+                    }
+                }
+                
             }
         }
     }

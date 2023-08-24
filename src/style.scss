@@ -4,3 +4,7 @@
     list-style: none;
     font-family: 'Noto Sans TC', sans-serif;
 }
+
+body{
+    overflow: hidden; /* 使手機下滑重新整理失效 */
+}
